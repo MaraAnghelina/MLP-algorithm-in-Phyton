@@ -1,0 +1,40 @@
+import numpy as np
+from sklearn import neural_network
+import pandas as pnd
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+
+#Importarea datelor
+data = pnd.read_csv('abalone.data')
+data['sex'] = data['sex'].astype('category')
+
+categ = np.array(data['sex'].cat.codes.values).reshape(-1,1)
+conts = np.array(data.drop(['sex','rings'], axis = 1))
+date = np.append(categ, conts, axis = 1);
+etichete = np.array(data['rings'].values)
+
+size = len(data['sex'])
+trainSize = int(size * 0.75)
+testSize = int(size * 0.25)
+
+#Impartire in train si test
+dateTrain = date[:trainSize]
+eticheteTrain = etichete[:trainSize]
+
+dateTest = date[trainSize:]
+eticheteTest = etichete[trainSize:]
+
+#Creare si antrenare MLP
+regr = neural_network.MLPRegressor(hidden_layer_sizes=(4), max_iter = 2000, verbose = False, learning_rate_init = 0.01)
+regr.fit(dateTrain, eticheteTrain)
+
+#Testare MLP
+predictii = regr.predict(dateTest)
+
+for i in range(testSize):
+    print(f"Varsta prezisa: {predictii[i]}  Varsta reala: {eticheteTest[i]}")
+
+#Eroare
+MSE = mean_squared_error(predictii, eticheteTest)
+print('\nEroarea este: ', str(sqrt(MSE)))
+
